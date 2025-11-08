@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sopeng.ai - Modern AI Assistant</title>
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Highlight.js for Code Syntax Highlighting -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+    
+    <!-- Marked.js for Markdown Parsing -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    
+    <!-- Highlight.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    
+    <!-- Link to CSS file -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <button class="new-chat-btn" onclick="newChat()">
+                    <i class="fas fa-plus"></i>
+                    New Chat
+                </button>
+            </div>
+            <div class="chat-history" id="chatHistory">
+                <!-- Chat history will be populated here -->
+            </div>
+            <div class="sidebar-footer">
+                <div class="user-profile">
+                    <div class="user-avatar">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <div class="user-info">
+                        <div class="user-name">User</div>
+                        <div class="user-email">user@sopeng.ai</div>
+                    </div>
+                    <i class="fas fa-ellipsis-h" style="color: var(--text-tertiary);"></i>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="chat-header">
+                <div class="header-left">
+                    <button class="menu-toggle" id="menuToggle" onclick="toggleSidebar()">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                    <div class="model-selector">
+                        <i class="fas fa-robot"></i>
+                        <span id="modelName">Sopeng v2.1</span>
+                        <i class="fas fa-chevron-down" style="font-size: 10px;"></i>
+                    </div>
+                </div>
+                <div class="header-right">
+                    <button class="icon-btn" onclick="toggleDarkMode()" title="Toggle Dark Mode">
+                        <i class="fas fa-moon" id="themeIcon"></i>
+                    </button>
+                    <button class="icon-btn" onclick="clearAllChats()" title="Clear Chat">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+            </header>
+
+            <div class="chat-messages" id="chatMessages">
+                <div class="messages-container">
+                    <!-- Welcome Screen -->
+                    <div class="welcome-screen" id="welcomeScreen">
+                        <div class="welcome-icon">
+                            <i class="fas fa-robot"></i>
+                        </div>
+                        <h1 class="welcome-title">Bagaimana saya bisa membantu Anda hari ini?</h1>
+                        <p class="welcome-subtitle">Saya adalah Sopeng, asisten AI Anda yang siap membantu apapun yang Anda butuhkan</p>
+                        
+                        <div class="suggestions-grid">
+                            <div class="suggestion-card" onclick="sendSuggestion('Bantu saya menulis email profesional untuk klien')">
+                                <div class="suggestion-icon"><i class="fas fa-envelope"></i></div>
+                                <div class="suggestion-title">Tulis Email</div>
+                                <div class="suggestion-desc">Bantuan menulis email profesional</div>
+                            </div>
+                            <div class="suggestion-card" onclick="sendSuggestion('Jelaskan tentang quantum computing dengan bahasa sederhana')">
+                                <div class="suggestion-icon"><i class="fas fa-graduation-cap"></i></div>
+                                <div class="suggestion-title">Belajar Sesuatu</div>
+                                <div class="suggestion-desc">Dapatkan penjelasan yang jelas</div>
+                            </div>
+                            <div class="suggestion-card" onclick="sendSuggestion('Berikan ide kreatif untuk project baru saya')">
+                                <div class="suggestion-icon"><i class="fas fa-lightbulb"></i></div>
+                                <div class="suggestion-title">Brainstorming</div>
+                                <div class="suggestion-desc">Partner berpikir kreatif</div>
+                            </div>
+                            <div class="suggestion-card" onclick="sendSuggestion('Buatkan contoh code Python untuk API dengan FastAPI')">
+                                <div class="suggestion-icon"><i class="fas fa-code"></i></div>
+                                <div class="suggestion-title">Code Review</div>
+                                <div class="suggestion-desc">Bantuan pemrograman</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Typing Indicator -->
+                    <div class="typing-indicator" id="typingIndicator">
+                        <div class="message-avatar bot-avatar">
+                            <i class="fas fa-robot"></i>
+                        </div>
+                        <div class="typing-dots">
+                            <span></span>
+                            <span></span>
+                            <span></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="input-container">
+                <div class="input-wrapper">
+                    <div class="input-box">
+                        <textarea 
+                            class="message-input" 
+                            id="messageInput" 
+                            placeholder="Ketik pesan Anda di sini..."
+                            rows="1"
+                        ></textarea>
+                        <button class="send-button" id="sendButton" onclick="sendMessage()">
+                            <i class="fas fa-arrow-up"></i>
+                        </button>
+                    </div>
+                    <div class="input-footer">
+                        <span id="statusText">Sopeng.ai dapat membuat kesalahan. Pertimbangkan untuk memeriksa informasi penting.</span>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Configuration -->
+    <script src="config.js"></script>
+    
+    <!-- API Handler -->
+    <script src="api.js"></script>
+    
+    <!-- Main Script -->
+    <script src="script.js"></script>
+</body>
+</html>

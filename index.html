@@ -3,87 +3,721 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Assistant - Modern Chatbot</title>
+    <title>Sopeng.ai - Asisten AI Cerdas untuk Semua Kebutuhan Anda</title>
     
     <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     
-    <!-- Font Awesome Icons (Lebih Reliable) -->
+    <!-- Font Awesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
-    <!-- Animate.css -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
-    
-    <!-- Link to CSS file -->
-    <link rel="stylesheet" href="style.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #10a37f;
+            --primary-dark: #0d8f6f;
+            --secondary: #1a1a2e;
+            --text-dark: #2d2d2d;
+            --text-light: #6b6b6b;
+            --bg-light: #f7f7f8;
+            --white: #ffffff;
+            --border: #e5e5e5;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            color: var(--text-dark);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        /* ==========================================
+           NAVBAR
+        ========================================== */
+        .navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            padding: 20px 0;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--border);
+            z-index: 1000;
+            transition: all 0.3s ease;
+        }
+
+        .navbar.scrolled {
+            padding: 15px 0;
+            box-shadow: 0 2px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 24px;
+            font-weight: 800;
+            color: var(--text-dark);
+            text-decoration: none;
+        }
+
+        .logo-icon {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 20px;
+            box-shadow: 0 4px 12px rgba(16, 163, 127, 0.3);
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 40px;
+            align-items: center;
+        }
+
+        .nav-links a {
+            color: var(--text-light);
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 15px;
+            transition: color 0.3s ease;
+        }
+
+        .nav-links a:hover {
+            color: var(--primary);
+        }
+
+        .nav-cta {
+            padding: 12px 28px;
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+            border-radius: 10px;
+            font-weight: 600;
+            box-shadow: 0 4px 12px rgba(16, 163, 127, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .nav-cta:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(16, 163, 127, 0.4);
+        }
+
+        /* ==========================================
+           HERO SECTION
+        ========================================== */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            padding: 100px 30px 80px;
+            background: linear-gradient(135deg, #f7f7f8 0%, #ffffff 100%);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            width: 600px;
+            height: 600px;
+            background: radial-gradient(circle, rgba(16, 163, 127, 0.1) 0%, transparent 70%);
+            border-radius: 50%;
+            top: -200px;
+            right: -200px;
+            animation: float 6s ease-in-out infinite;
+        }
+
+        .hero::after {
+            content: '';
+            position: absolute;
+            width: 400px;
+            height: 400px;
+            background: radial-gradient(circle, rgba(16, 163, 127, 0.08) 0%, transparent 70%);
+            border-radius: 50%;
+            bottom: -100px;
+            left: -100px;
+            animation: float 8s ease-in-out infinite reverse;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-30px); }
+        }
+
+        .hero-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 80px;
+            align-items: center;
+            position: relative;
+            z-index: 1;
+        }
+
+        .hero-content h1 {
+            font-size: 56px;
+            font-weight: 900;
+            line-height: 1.2;
+            margin-bottom: 24px;
+            color: var(--text-dark);
+        }
+
+        .hero-content .gradient-text {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero-content p {
+            font-size: 20px;
+            color: var(--text-light);
+            margin-bottom: 40px;
+            line-height: 1.8;
+        }
+
+        .hero-buttons {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 16px 36px;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 16px;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            border: none;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+            box-shadow: 0 8px 24px rgba(16, 163, 127, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 32px rgba(16, 163, 127, 0.4);
+        }
+
+        .btn-secondary {
+            background: white;
+            color: var(--text-dark);
+            border: 2px solid var(--border);
+        }
+
+        .btn-secondary:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
+        .hero-visual {
+            position: relative;
+            animation: fadeInRight 1s ease;
+        }
+
+        @keyframes fadeInRight {
+            from {
+                opacity: 0;
+                transform: translateX(50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .hero-chat-preview {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
+            border: 1px solid var(--border);
+        }
+
+        .chat-header-preview {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 24px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .chat-avatar {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 20px;
+        }
+
+        .chat-info h4 {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text-dark);
+        }
+
+        .chat-info p {
+            font-size: 13px;
+            color: var(--text-light);
+            margin: 0;
+        }
+
+        .chat-message {
+            background: var(--bg-light);
+            padding: 14px 18px;
+            border-radius: 12px;
+            margin-bottom: 12px;
+            font-size: 14px;
+            color: var(--text-dark);
+            animation: slideUp 0.5s ease;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .typing-dots {
+            display: flex;
+            gap: 6px;
+            padding: 14px 18px;
+        }
+
+        .typing-dots span {
+            width: 8px;
+            height: 8px;
+            background: var(--primary);
+            border-radius: 50%;
+            animation: typing 1.4s infinite;
+        }
+
+        .typing-dots span:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .typing-dots span:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+
+        @keyframes typing {
+            0%, 60%, 100% {
+                transform: translateY(0);
+                opacity: 0.3;
+            }
+            30% {
+                transform: translateY(-10px);
+                opacity: 1;
+            }
+        }
+
+        /* ==========================================
+           FEATURES SECTION
+        ========================================== */
+        .features {
+            padding: 100px 30px;
+            background: white;
+        }
+
+        .features-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .section-header {
+            text-align: center;
+            margin-bottom: 60px;
+        }
+
+        .section-badge {
+            display: inline-block;
+            padding: 8px 20px;
+            background: rgba(16, 163, 127, 0.1);
+            color: var(--primary);
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 16px;
+        }
+
+        .section-header h2 {
+            font-size: 42px;
+            font-weight: 800;
+            color: var(--text-dark);
+            margin-bottom: 16px;
+        }
+
+        .section-header p {
+            font-size: 18px;
+            color: var(--text-light);
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 30px;
+        }
+
+        .feature-card {
+            padding: 40px 30px;
+            background: var(--bg-light);
+            border-radius: 16px;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-8px);
+            border-color: var(--primary);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.08);
+        }
+
+        .feature-icon {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            color: white;
+            margin-bottom: 24px;
+            box-shadow: 0 8px 20px rgba(16, 163, 127, 0.3);
+        }
+
+        .feature-card h3 {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--text-dark);
+            margin-bottom: 12px;
+        }
+
+        .feature-card p {
+            font-size: 15px;
+            color: var(--text-light);
+            line-height: 1.7;
+        }
+
+        /* ==========================================
+           USE CASES SECTION
+        ========================================== */
+        .use-cases {
+            padding: 100px 30px;
+            background: var(--bg-light);
+        }
+
+        .use-cases-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .use-cases-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 24px;
+        }
+
+        .use-case-card {
+            background: white;
+            padding: 32px;
+            border-radius: 16px;
+            border: 2px solid transparent;
+            transition: all 0.3s ease;
+        }
+
+        .use-case-card:hover {
+            border-color: var(--primary);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+        }
+
+        .use-case-header {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 16px;
+        }
+
+        .use-case-icon {
+            width: 48px;
+            height: 48px;
+            background: rgba(16, 163, 127, 0.1);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+            color: var(--primary);
+        }
+
+        .use-case-card h3 {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--text-dark);
+            margin-bottom: 8px;
+        }
+
+        .use-case-card p {
+            font-size: 15px;
+            color: var(--text-light);
+            line-height: 1.7;
+        }
+
+        /* ==========================================
+           CTA SECTION
+        ========================================== */
+        .cta {
+            padding: 100px 30px;
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            position: relative;
+            overflow: hidden;
+        }
+
+        .cta::before {
+            content: '';
+            position: absolute;
+            width: 500px;
+            height: 500px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 50%;
+            top: -200px;
+            right: -100px;
+        }
+
+        .cta::after {
+            content: '';
+            position: absolute;
+            width: 400px;
+            height: 400px;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 50%;
+            bottom: -150px;
+            left: -100px;
+        }
+
+        .cta-container {
+            max-width: 800px;
+            margin: 0 auto;
+            text-align: center;
+            position: relative;
+            z-index: 1;
+        }
+
+        .cta-container h2 {
+            font-size: 48px;
+            font-weight: 900;
+            color: white;
+            margin-bottom: 20px;
+        }
+
+        .cta-container p {
+            font-size: 20px;
+            color: rgba(255, 255, 255, 0.9);
+            margin-bottom: 40px;
+        }
+
+        .cta .btn-primary {
+            background: white;
+            color: var(--primary);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+        }
+
+        .cta .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 32px rgba(0, 0, 0, 0.3);
+        }
+
+        /* ==========================================
+           FOOTER
+        ========================================== */
+        .footer {
+            padding: 40px 30px;
+            background: var(--secondary);
+            color: white;
+        }
+
+        .footer-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .footer-logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 20px;
+            font-weight: 800;
+        }
+
+        .footer-links {
+            display: flex;
+            gap: 30px;
+        }
+
+        .footer-links a {
+            color: rgba(255, 255, 255, 0.7);
+            text-decoration: none;
+            font-size: 14px;
+            transition: color 0.3s ease;
+        }
+
+        .footer-links a:hover {
+            color: white;
+        }
+
+        /* ==========================================
+           RESPONSIVE
+        ========================================== */
+        @media (max-width: 968px) {
+            .hero-container {
+                grid-template-columns: 1fr;
+                gap: 40px;
+            }
+
+            .hero-content h1 {
+                font-size: 42px;
+            }
+
+            .features-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .use-cases-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .nav-links {
+                display: none;
+            }
+        }
+
+        @media (max-width: 640px) {
+            .hero-content h1 {
+                font-size: 36px;
+            }
+
+            .hero-content p {
+                font-size: 18px;
+            }
+
+            .section-header h2 {
+                font-size: 32px;
+            }
+
+            .cta-container h2 {
+                font-size: 36px;
+            }
+
+            .footer-container {
+                flex-direction: column;
+                gap: 20px;
+                text-align: center;
+            }
+        }
+    </style>
 </head>
 <body>
-    <!-- Animated Background -->
-    <div class="background-animated">
-        <div class="gradient-blob blob-1"></div>
-        <div class="gradient-blob blob-2"></div>
-        <div class="gradient-blob blob-3"></div>
-    </div>
-
-    <div class="container">
-        <!-- Header -->
-        <div class="header">
-            <div class="header-icon">
-                <i class="fas fa-robot"></i>
-            </div>
-            <h1>AI Assistant</h1>
-            <p>Asisten virtual cerdas yang siap membantu Anda</p>
-        </div>
-
-        <!-- Chat Container -->
-        <div class="chat-container">
-            <div class="chat-messages" id="chatMessages">
-                <!-- Welcome Screen -->
-                <div class="welcome-screen" id="welcomeScreen">
-                    <div class="welcome-icon">
-                        <i class="fas fa-sparkles"></i>
-                    </div>
-                    <h2>Selamat Datang!</h2>
-                    <p>Saya adalah asisten AI Anda. Bagaimana saya bisa membantu Anda hari ini?</p>
-                    
-                    <div class="suggestions">
-                        <div class="suggestion-card" onclick="sendSuggestion('Apa kabar? Ceritakan tentang dirimu')">
-                            <i class="fas fa-user-circle"></i>
-                            <h3>Kenalan</h3>
-                            <p>Berkenalan dengan AI Assistant</p>
-                        </div>
-                        <div class="suggestion-card" onclick="sendSuggestion('Bantu saya brainstorming ide untuk project baru')">
-                            <i class="fas fa-lightbulb"></i>
-                            <h3>Brainstorming</h3>
-                            <p>Dapatkan ide-ide kreatif</p>
-                        </div>
-                        <div class="suggestion-card" onclick="sendSuggestion('Jelaskan tentang teknologi web modern')">
-                            <i class="fas fa-code"></i>
-                            <h3>Belajar</h3>
-                            <p>Pelajari hal baru</p>
-                        </div>
-                        <div class="suggestion-card" onclick="sendSuggestion('Tulis email profesional untuk klien')">
-                            <i class="fas fa-envelope"></i>
-                            <h3>Tulis Email</h3>
-                            <p>Bantuan menulis email</p>
-                        </div>
-                        <div class="suggestion-card" onclick="sendSuggestion('Berikan tips produktivitas untuk bekerja')">
-                            <i class="fas fa-rocket"></i>
-                            <h3>Produktivitas</h3>
-                            <p>Tips bekerja lebih efektif</p>
-                        </div>
-                        <div class="suggestion-card" onclick="sendSuggestion('Ceritakan fakta menarik tentang teknologi')">
-                            <i class="fas fa-brain"></i>
-                            <h3>Fakta Menarik</h3>
-                            <p>Temukan hal baru</p>
-                        </div>
-                    </div>
+    <!-- Navbar -->
+    <nav class="navbar" id="navbar">
+        <div class="nav-container">
+            <a href="#" class="logo">
+                <div class="logo-icon">
+                    <i class="fas fa-robot"></i>
                 </div>
+                <span>Sopeng.ai</span>
+            </a>
+            <div class="nav-links">
+                <a href="#features">Fitur</a>
+                <a href="#use-cases">Kegunaan</a>
+                <a href="#about">Tentang</a>
+                <a href="chat.html" class="nav-cta">Mulai Chat</a>
+            </div>
+        </div>
+    </nav>
 
-                <!-- Typing Indicator -->
-                <div class="typing-indicator" id="typingIndicator">
-                    <div class="avatar bot">
-                        <i class="fas fa-robot"></i>
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-container">
+            <div class="hero-content">
+                <h1>
+                    Asisten AI Cerdas untuk 
+                    <span class="gradient-text">Semua Kebutuhan Anda</span>
+                </h1>
+                <p>
+                    Sopeng.ai adalah asisten AI yang siap membantu Anda dalam berbagai hal. 
+                    Dari menjawab pertanyaan, menulis konten, hingga membantu coding - semuanya dalam satu platform.
+                </p>
+                <div class="hero-buttons">
+                    <a href="chat.html" class="btn btn-primary">
+                        <i class="fas fa-rocket"></i>
+                        Mulai Sekarang - Gratis
+                    </a>
+                    <a href="#features" class="btn btn-secondary">
+                        <i class="fas fa-play-circle"></i>
+                        Lihat Fitur
+                    </a>
+                </div>
+            </div>
+            <div class="hero-visual">
+                <div class="hero-chat-preview">
+                    <div class="chat-header-preview">
+                        <div class="chat-avatar">
+                            <i class="fas fa-robot"></i>
+                        </div>
+                        <div class="chat-info">
+                            <h4>Sopeng AI</h4>
+                            <p>Online • Siap Membantu</p>
+                        </div>
+                    </div>
+                    <div class="chat-message">
+                        👋 Halo! Saya Sopeng, asisten AI Anda
+                    </div>
+                    <div class="chat-message">
+                        Bagaimana saya bisa membantu Anda hari ini?
                     </div>
                     <div class="typing-dots">
                         <span></span>
@@ -92,43 +726,162 @@
                     </div>
                 </div>
             </div>
+        </div>
+    </section>
 
-            <!-- Input Area -->
-            <div class="input-area">
-                <div class="input-wrapper">
-                    <button class="attach-btn" id="attachBtn" title="Attach file">
-                        <i class="fas fa-paperclip"></i>
-                    </button>
-                    <input 
-                        type="text" 
-                        id="messageInput" 
-                        placeholder="Ketik pesan Anda di sini..."
-                        autocomplete="off"
-                    >
-                    <button class="emoji-btn" id="emojiBtn" title="Add emoji">
-                        <i class="fas fa-smile"></i>
-                    </button>
-                    <button class="send-btn" id="sendBtn" onclick="sendMessage()">
-                        <i class="fas fa-paper-plane"></i>
-                    </button>
-                </div>
-                <div class="input-footer">
-                    <div class="status">
-                        <i class="fas fa-check-circle"></i>
-                        <span>Ready to chat</span>
+    <!-- Features Section -->
+    <section class="features" id="features">
+        <div class="features-container">
+            <div class="section-header">
+                <span class="section-badge">✨ FITUR UNGGULAN</span>
+                <h2>Kenapa Memilih Sopeng.ai?</h2>
+                <p>Berbagai fitur canggih yang memudahkan pekerjaan Anda sehari-hari</p>
+            </div>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-brain"></i>
                     </div>
+                    <h3>AI yang Cerdas</h3>
+                    <p>Menggunakan model AI terbaru yang dapat memahami konteks dan memberikan jawaban yang akurat dan relevan.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-bolt"></i>
+                    </div>
+                    <h3>Respons Cepat</h3>
+                    <p>Dapatkan jawaban dalam hitungan detik. Tidak perlu menunggu lama untuk mendapatkan bantuan yang Anda butuhkan.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-shield-alt"></i>
+                    </div>
+                    <h3>Aman & Privasi</h3>
+                    <p>Data percakapan Anda aman dan terjaga. Kami tidak menyimpan informasi pribadi tanpa izin Anda.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-language"></i>
+                    </div>
+                    <h3>Bahasa Indonesia</h3>
+                    <p>Mendukung bahasa Indonesia dengan baik. Berkomunikasi dengan natural dan mudah dipahami.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-code"></i>
+                    </div>
+                    <h3>Code Assistant</h3>
+                    <p>Bantuan pemrograman dengan syntax highlighting dan copy code. Perfect untuk developer.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-mobile-alt"></i>
+                    </div>
+                    <h3>Responsive Design</h3>
+                    <p>Akses dari mana saja, kapan saja. Desktop, tablet, atau smartphone - semuanya berfungsi sempurna.</p>
                 </div>
             </div>
         </div>
-    </div>
+    </section>
 
-    <!-- Configuration -->
-    <script src="config.js"></script>
-    
-    <!-- API Handler -->
-    <script src="api.js"></script>
-    
-    <!-- Main Script -->
-    <script src="script.js"></script>
+    <!-- Use Cases Section -->
+    <section class="use-cases" id="use-cases">
+        <div class="use-cases-container">
+            <div class="section-header">
+                <span class="section-badge">🎯 KEGUNAAN</span>
+                <h2>Apa yang Bisa Sopeng.ai Lakukan?</h2>
+                <p>Berbagai kebutuhan yang dapat diselesaikan dengan bantuan AI</p>
+            </div>
+            <div class="use-cases-grid">
+                <div class="use-case-card">
+                    <div class="use-case-header">
+                        <div class="use-case-icon">
+                            <i class="fas fa-pen-fancy"></i>
+                        </div>
+                        <h3>Menulis & Editing</h3>
+                    </div>
+                    <p>Bantu menulis artikel, email profesional, caption sosial media, atau konten kreatif lainnya dengan struktur yang baik dan engaging.</p>
+                </div>
+                <div class="use-case-card">
+                    <div class="use-case-header">
+                        <div class="use-case-icon">
+                            <i class="fas fa-graduation-cap"></i>
+                        </div>
+                        <h3>Belajar & Pendidikan</h3>
+                    </div>
+                    <p>Penjelasan konsep kompleks dengan bahasa sederhana, bantuan PR, atau ringkasan materi pembelajaran yang mudah dipahami.</p>
+                </div>
+                <div class="use-case-card">
+                    <div class="use-case-header">
+                        <div class="use-case-icon">
+                            <i class="fas fa-laptop-code"></i>
+                        </div>
+                        <h3>Pemrograman</h3>
+                    </div>
+                    <p>Code review, debugging, penjelasan algoritma, atau bantuan dalam berbagai bahasa pemrograman dari Python hingga JavaScript.</p>
+                </div>
+                <div class="use-case-card">
+                    <div class="use-case-header">
+                        <div class="use-case-icon">
+                            <i class="fas fa-lightbulb"></i>
+                        </div>
+                        <h3>Brainstorming Ide</h3>
+                    </div>
+                    <p>Partner untuk mengembangkan ide bisnis, kampanye marketing, project kreatif, atau solusi untuk berbagai masalah.</p>
+                </div>
+                <div class="use-case-card">
+                    <div class="use-case-header">
+                        <div class="use-case-icon">
+                            <i class="fas fa-chart-line"></i>
+                        </div>
+                        <h3>Analisis Data</h3>
+                    </div>
+                    <p>Bantuan menganalisis data, membuat kesimpulan, atau menyajikan informasi dalam format yang mudah dimengerti.</p>
+                </div>
+                <div class="use-case-card">
+                    <div class="use-case-header">
+                        <div class="use-case-icon">
+                            <i class="fas fa-comments"></i>
+                        </div>
+                        <h3>Konsultasi</h3>
+                    </div>
+                    <p>Dapatkan saran atau rekomendasi untuk berbagai topik, dari produktivitas hingga pengembangan diri.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="cta">
+        <div class="cta-container">
+            <h2>Siap Mencoba Sopeng.ai?</h2>
+            <p>Mulai percakapan dengan AI cerdas kami sekarang juga. Gratis dan mudah!</p>
+            <a href="chat.html" class="btn btn-primary">
+                <i class="fas fa-rocket"></i>
+                Mulai Chat Sekarang
+            </a>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-container">
+            <div class="footer-logo">
+                <div class="logo-icon">
+                    <i class="fas fa-robot"></i>
+                </div>
+                <span>Sopeng.ai</span>
+            </div>
+            <div class="footer-links">
+                <a href="#features">Fitur</a>
+                <a href="#use-cases">Kegunaan</a>
+                <a href="chat.html">Chat</a>
+            </div>
+            <p style="color: rgba(255,255,255,0.6); font-size: 14px;">
+                © 2024 Sopeng.ai. All rights reserved.
+            </p>
+        </div>
+    </footer>
+
 </body>
 </html>

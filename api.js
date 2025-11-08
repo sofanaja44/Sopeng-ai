@@ -8,19 +8,26 @@ class ChatAPI {
         this.conversationHistory = [];
         this.requestCount = 0;
         this.lastRequestTime = Date.now();
+        this.isProcessing = false;
+        
+        if (this.config.DEBUG) {
+            console.log('🔌 ChatAPI initialized');
+        }
     }
 
     /**
      * Check if API key is configured
+     * @returns {boolean}
      */
     isConfigured() {
         return this.config.API_KEY && 
                this.config.API_KEY !== 'YOUR_OPENROUTER_API_KEY_HERE' &&
-               this.config.API_KEY.length > 0;
+               this.config.API_KEY.length > 20; // OpenRouter keys are longer than 20 chars
     }
 
     /**
      * Rate limiting check
+     * @returns {boolean}
      */
     checkRateLimit() {
         const now = Date.now();
@@ -42,16 +49,25 @@ class ChatAPI {
 
     /**
      * Add message to conversation history
+     * @param {string} role - 'user' or 'assistant'
+     * @param {string} content - Message content
      */
     addToHistory(role, content) {
         this.conversationHistory.push({
             role: role,
-            content: content
+            content: content,
+            timestamp: new Date().toISOString()
         });
         
-        // Keep only last 10 messages to avoid token limit
-        if (this.conversationHistory.length > 10) {
-            this.conversationHistory = this.conversationHistory.slice(-10);
+        // Keep only last N messages to avoid token limit
+        const maxLength = this.config.MAX_HISTORY_LENGTH || 10;
+        if (this.conversationHistory.length > maxLength) {
+            this.conversationHistory = this.conversationHistory.slice(-maxLength);
+        }
+        
+        if (this.config.DEBUG) {
+            console.log(`📝 Added to history (${role}):`, content.substring(0, 50) + '...');
+            console.log(`📚 History length: ${this.conversationHistory.length}/${maxLength}`);
         }
     }
 
@@ -60,12 +76,51 @@ class ChatAPI {
      */
     clearHistory() {
         this.conversationHistory = [];
+        if (this.config.DEBUG) {
+            console.log('🗑️ Conversation history cleared');
+        }
+    }
+
+    /**
+     * Get conversation history
+     * @returns {Array}
+     */
+    getHistory() {
+        return this.conversationHistory;
+    }
+
+    /**
+     * Export conversation history as JSON
+     * @returns {string}
+     */
+    exportHistory() {
+        return JSON.stringify(this.conversationHistory, null, 2);
+    }
+
+    /**
+     * Get usage statistics
+     * @returns {Object}
+     */
+    getStats() {
+        return {
+            messageCount: this.conversationHistory.length,
+            requestCount: this.requestCount,
+            lastRequestTime: this.lastRequestTime,
+            isProcessing: this.isProcessing
+        };
     }
 
     /**
      * Send message to OpenRouter API
+     * @param {string} userMessage - User's message
+     * @returns {Promise<Object>}
      */
     async sendMessage(userMessage) {
+        // Check if already processing
+        if (this.isProcessing) {
+            throw new Error('⏳ Tunggu pesan sebelumnya selesai diproses');
+        }
+
         // Check if API key is configured
         if (!this.isConfigured()) {
             throw new Error(this.config.ERROR_MESSAGES.API_KEY_MISSING);
@@ -76,19 +131,32 @@ class ChatAPI {
             throw new Error(this.config.ERROR_MESSAGES.RATE_LIMIT);
         }
 
-        // Add user message to history
-        this.addToHistory('user', userMessage);
-
-        // Prepare messages array
-        const messages = [
-            {
-                role: 'system',
-                content: this.config.SYSTEM_PROMPT
-            },
-            ...this.conversationHistory
-        ];
+        this.isProcessing = true;
+        const startTime = Date.now();
 
         try {
+            // Add user message to history
+            this.addToHistory('user', userMessage);
+
+            // Prepare messages array
+            const messages = [
+                {
+                    role: 'system',
+                    content: this.config.SYSTEM_PROMPT
+                },
+                ...this.conversationHistory
+            ];
+
+            if (this.config.DEBUG) {
+                console.log('🚀 Sending request to OpenRouter...');
+                console.log('📊 Request details:', {
+                    model: this.config.MODEL,
+                    messageCount: messages.length,
+                    userMessage: userMessage.substring(0, 50) + '...'
+                });
+            }
+
+            // Make API request
             const response = await fetch(this.config.API_URL, {
                 method: 'POST',
                 headers: {
@@ -103,18 +171,29 @@ class ChatAPI {
                     max_tokens: this.config.MAX_TOKENS,
                     temperature: this.config.TEMPERATURE,
                     top_p: this.config.TOP_P,
+                    frequency_penalty: this.config.FREQUENCY_PENALTY || 0,
+                    presence_penalty: this.config.PRESENCE_PENALTY || 0,
                 })
             });
+
+            const responseTime = Date.now() - startTime;
 
             // Check if response is ok
             if (!response.ok) {
                 const errorData = await response.json().catch(() => ({}));
-                console.error('API Error:', errorData);
                 
+                if (this.config.DEBUG) {
+                    console.error('❌ API Error:', errorData);
+                    console.error('📊 Status:', response.status);
+                }
+                
+                // Handle specific error codes
                 if (response.status === 401) {
-                    throw new Error('❌ API Key tidak valid. Silakan periksa kembali API key Anda.');
+                    throw new Error(this.config.ERROR_MESSAGES.INVALID_API_KEY);
                 } else if (response.status === 429) {
                     throw new Error(this.config.ERROR_MESSAGES.RATE_LIMIT);
+                } else if (response.status === 402) {
+                    throw new Error(this.config.ERROR_MESSAGES.QUOTA_EXCEEDED);
                 } else if (response.status >= 500) {
                     throw new Error(this.config.ERROR_MESSAGES.API_ERROR);
                 } else {
@@ -124,6 +203,12 @@ class ChatAPI {
 
             const data = await response.json();
             
+            if (this.config.DEBUG) {
+                console.log('✅ Response received');
+                console.log('⏱️ Response time:', responseTime + 'ms');
+                console.log('📊 Usage:', data.usage);
+            }
+
             // Extract AI response
             const aiMessage = data.choices?.[0]?.message?.content;
             
@@ -138,38 +223,94 @@ class ChatAPI {
                 success: true,
                 message: aiMessage,
                 model: data.model,
-                usage: data.usage
+                usage: data.usage,
+                responseTime: responseTime
             };
 
         } catch (error) {
-            console.error('Chat API Error:', error);
+            if (this.config.DEBUG) {
+                console.error('❌ Chat API Error:', error);
+            }
             
-            if (error.message.includes('Failed to fetch') || error.message.includes('NetworkError')) {
+            // Handle network errors
+            if (error.message.includes('Failed to fetch') || 
+                error.message.includes('NetworkError') ||
+                error.name === 'TypeError') {
                 throw new Error(this.config.ERROR_MESSAGES.NETWORK_ERROR);
             }
             
+            // Re-throw the error with proper message
             throw error;
+
+        } finally {
+            this.isProcessing = false;
         }
     }
 
     /**
-     * Get conversation history
+     * Test API connection
+     * @returns {Promise<boolean>}
      */
-    getHistory() {
-        return this.conversationHistory;
+    async testConnection() {
+        try {
+            const response = await this.sendMessage('Hello');
+            return response.success;
+        } catch (error) {
+            if (this.config.DEBUG) {
+                console.error('❌ Connection test failed:', error);
+            }
+            return false;
+        }
     }
 
     /**
-     * Get usage stats
+     * Get available models (placeholder - could be expanded)
+     * @returns {Array}
      */
-    getStats() {
-        return {
-            messageCount: this.conversationHistory.length,
-            requestCount: this.requestCount,
-            lastRequestTime: this.lastRequestTime
-        };
+    getAvailableModels() {
+        return [
+            { id: 'minimax/minimax-m2:free', name: 'Sopeng v2.1', free: true },
+            { id: 'meta-llama/llama-3.2-3b-instruct:free', name: 'Llama 3.2 3B', free: true },
+            { id: 'google/gemini-flash-1.5-8b:free', name: 'Gemini Flash 1.5', free: true },
+            { id: 'microsoft/phi-3-mini-128k-instruct:free', name: 'Phi-3 Mini', free: true },
+            { id: 'openai/gpt-3.5-turbo', name: 'GPT-3.5 Turbo', free: false },
+            { id: 'anthropic/claude-3-haiku', name: 'Claude 3 Haiku', free: false },
+        ];
+    }
+
+    /**
+     * Change model
+     * @param {string} modelId
+     */
+    changeModel(modelId) {
+        this.config.MODEL = modelId;
+        if (this.config.DEBUG) {
+            console.log('🔄 Model changed to:', modelId);
+        }
+    }
+
+    /**
+     * Reset rate limit counter
+     */
+    resetRateLimit() {
+        this.requestCount = 0;
+        this.lastRequestTime = Date.now();
+        if (this.config.DEBUG) {
+            console.log('🔄 Rate limit counter reset');
+        }
     }
 }
 
 // Create global instance
 const chatAPI = new ChatAPI(CONFIG);
+
+// Export for ES6 modules (optional)
+if (typeof module !== 'undefined' && module.exports) {
+    module.exports = ChatAPI;
+}
+
+// Log initialization
+if (CONFIG.DEBUG) {
+    console.log('✅ ChatAPI instance created and ready');
+    console.log('🔗 Global variable "chatAPI" is available');
+}
