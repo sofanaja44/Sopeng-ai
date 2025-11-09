@@ -5,7 +5,7 @@
 const CONFIG = {
     // OpenRouter API Configuration
     API_URL: 'https://openrouter.ai/api/v1/chat/completions',
-    API_KEY: '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', // Ganti dengan API key Anda dari https://openrouter.ai/keys
+    API_KEY: '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', // Ganti dengan API key Anda dari https://openrouter.ai/keys
     
     // Model Configuration
     // Backend menggunakan: 'minimax/minimax-m2:free'

@@ -1,5 +1,5 @@
 // ==========================================
-// SOPENG.AI - MAIN SCRIPT
+// SOPENG.AI - MAIN SCRIPT (FIXED SIDEBAR)
 // ==========================================
 
 // Initialize
@@ -10,6 +10,7 @@ document.addEventListener('DOMContentLoaded', function() {
     setupKeyboardShortcuts();
     checkAPIConfiguration();
     updateModelName();
+    setupSidebarOverlay();
     
     // Configure marked.js for markdown parsing
     if (typeof marked !== 'undefined') {
@@ -21,6 +22,30 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 });
+
+// ==========================================
+// SETUP SIDEBAR OVERLAY (MOBILE)
+// ==========================================
+function setupSidebarOverlay() {
+    // Create overlay element
+    const overlay = document.createElement('div');
+    overlay.className = 'sidebar-overlay';
+    overlay.id = 'sidebarOverlay';
+    document.body.appendChild(overlay);
+    
+    // Close sidebar when overlay clicked
+    overlay.addEventListener('click', function() {
+        toggleSidebar();
+    });
+    
+    // Auto-collapse sidebar on mobile
+    if (isMobile()) {
+        const sidebar = document.getElementById('sidebar');
+        if (sidebar && !sidebar.classList.contains('collapsed')) {
+            sidebar.classList.add('collapsed');
+        }
+    }
+}
 
 // ==========================================
 // CHECK API CONFIGURATION
@@ -59,14 +84,14 @@ function parseMarkdown(text) {
     html = html.replace(/<pre><code class="language-(\w+)">([\s\S]*?)<\/code><\/pre>/g, function(match, lang, code) {
         const decodedCode = decodeHtmlEntities(code);
         const escapedCode = escapeForAttribute(decodedCode);
-        return '<pre><div class="code-header"><span class="code-language">' + lang.toUpperCase() + '</span><button class="code-copy-btn" onclick="copyCode(this, \'' + escapedCode + '\')"><i class="fas fa-copy"></i><span>Salin</span></button></div><code class="language-' + lang + '">' + code + '</code></pre>';
+        return `<pre><div class="code-header"><span class="code-language">${lang.toUpperCase()}</span><button class="code-copy-btn" onclick="copyCode(this, '${escapedCode}')"><i class="fas fa-copy"></i><span>Salin</span></button></div><code class="language-${lang}">${code}</code></pre>`;
     });
     
     // Handle code blocks without language specification
     html = html.replace(/<pre><code>([\s\S]*?)<\/code><\/pre>/g, function(match, code) {
         const decodedCode = decodeHtmlEntities(code);
         const escapedCode = escapeForAttribute(decodedCode);
-        return '<pre><div class="code-header"><span class="code-language">CODE</span><button class="code-copy-btn" onclick="copyCode(this, \'' + escapedCode + '\')"><i class="fas fa-copy"></i><span>Salin</span></button></div><code>' + code + '</code></pre>';
+        return `<pre><div class="code-header"><span class="code-language">CODE</span><button class="code-copy-btn" onclick="copyCode(this, '${escapedCode}')"><i class="fas fa-copy"></i><span>Salin</span></button></div><code>${code}</code></pre>`;
     });
     
     return html;
@@ -165,22 +190,38 @@ function toggleDarkMode() {
     document.body.classList.toggle('dark-mode');
     const isDark = document.body.classList.contains('dark-mode');
     localStorage.setItem('theme', isDark ? 'dark' : 'light');
-    document.getElementById('themeIcon').className = isDark ? 'fas fa-sun' : 'fas fa-moon';
+    const themeIcon = document.getElementById('themeIcon');
+    if (themeIcon) {
+        themeIcon.className = isDark ? 'fas fa-sun' : 'fas fa-moon';
+    }
 }
 
 function loadTheme() {
-    const theme = localStorage.getItem('theme') || 'light';
+    const theme = localStorage.getItem('theme') || 'dark';
     if (theme === 'dark') {
         document.body.classList.add('dark-mode');
-        document.getElementById('themeIcon').className = 'fas fa-sun';
+        const themeIcon = document.getElementById('themeIcon');
+        if (themeIcon) {
+            themeIcon.className = 'fas fa-sun';
+        }
     }
 }
 
 // ==========================================
-// SIDEBAR TOGGLE
+// SIDEBAR TOGGLE - FIXED VERSION
 // ==========================================
 function toggleSidebar() {
-    document.getElementById('sidebar').classList.toggle('collapsed');
+    const sidebar = document.getElementById('sidebar');
+    const overlay = document.getElementById('sidebarOverlay');
+    
+    if (sidebar) {
+        sidebar.classList.toggle('collapsed');
+        
+        // Toggle overlay on mobile
+        if (isMobile() && overlay) {
+            overlay.classList.toggle('active');
+        }
+    }
 }
 
 // ==========================================
@@ -188,10 +229,12 @@ function toggleSidebar() {
 // ==========================================
 function autoResizeTextarea() {
     const textarea = document.getElementById('messageInput');
-    textarea.addEventListener('input', function() {
-        this.style.height = 'auto';
-        this.style.height = Math.min(this.scrollHeight, 200) + 'px';
-    });
+    if (textarea) {
+        textarea.addEventListener('input', function() {
+            this.style.height = 'auto';
+            this.style.height = Math.min(this.scrollHeight, 200) + 'px';
+        });
+    }
 }
 
 // ==========================================
@@ -219,18 +262,23 @@ async function sendMessage() {
 
     // Disable input
     const sendButton = document.getElementById('sendButton');
-    sendButton.disabled = true;
+    if (sendButton) sendButton.disabled = true;
     input.disabled = true;
 
     // Show typing indicator
-    document.getElementById('typingIndicator').classList.add('active');
+    const typingIndicator = document.getElementById('typingIndicator');
+    if (typingIndicator) {
+        typingIndicator.classList.add('active');
+    }
     scrollToBottom();
     updateStatus('Sopeng sedang berpikir...');
 
     try {
         const response = await chatAPI.sendMessage(message);
         
-        document.getElementById('typingIndicator').classList.remove('active');
+        if (typingIndicator) {
+            typingIndicator.classList.remove('active');
+        }
         addMessage(response.message, 'bot');
         
         if (response.usage) {
@@ -241,12 +289,14 @@ async function sendMessage() {
         
     } catch (error) {
         console.error('Error:', error);
-        document.getElementById('typingIndicator').classList.remove('active');
+        if (typingIndicator) {
+            typingIndicator.classList.remove('active');
+        }
         addMessage(error.message || 'Terjadi kesalahan. Silakan coba lagi.', 'bot', true);
         updateStatus('Error terjadi');
         showNotification(error.message, 'error');
     } finally {
-        sendButton.disabled = false;
+        if (sendButton) sendButton.disabled = false;
         input.disabled = false;
         input.focus();
     }
@@ -256,8 +306,11 @@ async function sendMessage() {
 // SEND SUGGESTION
 // ==========================================
 function sendSuggestion(text) {
-    document.getElementById('messageInput').value = text;
-    sendMessage();
+    const input = document.getElementById('messageInput');
+    if (input) {
+        input.value = text;
+        sendMessage();
+    }
 }
 
 // ==========================================
@@ -265,8 +318,10 @@ function sendSuggestion(text) {
 // ==========================================
 function addMessage(text, sender, isError = false) {
     const messagesContainer = document.querySelector('.messages-container');
+    if (!messagesContainer) return;
+    
     const messageDiv = document.createElement('div');
-    messageDiv.className = 'message ' + sender;
+    messageDiv.className = `message ${sender}`;
     
     const time = new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
     
@@ -282,9 +337,32 @@ function addMessage(text, sender, isError = false) {
         messageContent = escapeHtml(text);
     }
     
-    messageDiv.innerHTML = '<div class="message-avatar ' + avatarClass + '"><i class="fas ' + avatarIcon + '"></i></div><div class="message-content"><div class="message-text" ' + errorStyle + '>' + messageContent + '</div><div class="message-time">' + time + '</div>' + (sender === 'bot' && !isError ? '<div class="message-actions"><button class="action-btn" onclick="copyMessage(this)"><i class="fas fa-copy"></i> Copy</button><button class="action-btn" onclick="regenerateMessage()"><i class="fas fa-redo"></i> Regenerate</button></div>' : '') + '</div>';
+    messageDiv.innerHTML = `
+        <div class="message-avatar ${avatarClass}">
+            <i class="fas ${avatarIcon}"></i>
+        </div>
+        <div class="message-content">
+            <div class="message-text" ${errorStyle}>${messageContent}</div>
+            <div class="message-time">${time}</div>
+            ${sender === 'bot' && !isError ? `
+                <div class="message-actions">
+                    <button class="action-btn" onclick="copyMessage(this)">
+                        <i class="fas fa-copy"></i> Copy
+                    </button>
+                    <button class="action-btn" onclick="regenerateMessage()">
+                        <i class="fas fa-redo"></i> Regenerate
+                    </button>
+                </div>
+            ` : ''}
+        </div>
+    `;
     
-    messagesContainer.insertBefore(messageDiv, document.getElementById('typingIndicator'));
+    const typingIndicator = document.getElementById('typingIndicator');
+    if (typingIndicator) {
+        messagesContainer.insertBefore(messageDiv, typingIndicator);
+    } else {
+        messagesContainer.appendChild(messageDiv);
+    }
     
     // Highlight code blocks if it's a bot message
     if (sender === 'bot' && !isError) {
@@ -320,8 +398,11 @@ function regenerateMessage() {
         messages[messages.length - 1].remove();
         
         // Send again
-        document.getElementById('messageInput').value = lastUserMessage;
-        sendMessage();
+        const input = document.getElementById('messageInput');
+        if (input) {
+            input.value = lastUserMessage;
+            sendMessage();
+        }
     }
 }
 
@@ -333,7 +414,49 @@ function newChat() {
         chatAPI.clearHistory();
         
         const messagesContainer = document.querySelector('.messages-container');
-        messagesContainer.innerHTML = '<div class="welcome-screen" id="welcomeScreen"><div class="welcome-icon"><i class="fas fa-robot"></i></div><h1 class="welcome-title">Bagaimana saya bisa membantu Anda hari ini?</h1><p class="welcome-subtitle">Saya adalah Sopeng, asisten AI Anda yang siap membantu apapun yang Anda butuhkan</p><div class="suggestions-grid"><div class="suggestion-card" onclick="sendSuggestion(\'Bantu saya menulis email profesional untuk klien\')"><div class="suggestion-icon"><i class="fas fa-envelope"></i></div><div class="suggestion-title">Tulis Email</div><div class="suggestion-desc">Bantuan menulis email profesional</div></div><div class="suggestion-card" onclick="sendSuggestion(\'Jelaskan tentang quantum computing dengan bahasa sederhana\')"><div class="suggestion-icon"><i class="fas fa-graduation-cap"></i></div><div class="suggestion-title">Belajar Sesuatu</div><div class="suggestion-desc">Dapatkan penjelasan yang jelas</div></div><div class="suggestion-card" onclick="sendSuggestion(\'Berikan ide kreatif untuk project baru saya\')"><div class="suggestion-icon"><i class="fas fa-lightbulb"></i></div><div class="suggestion-title">Brainstorming</div><div class="suggestion-desc">Partner berpikir kreatif</div></div><div class="suggestion-card" onclick="sendSuggestion(\'Buatkan contoh code Python untuk API dengan FastAPI\')"><div class="suggestion-icon"><i class="fas fa-code"></i></div><div class="suggestion-title">Code Review</div><div class="suggestion-desc">Bantuan pemrograman</div></div></div></div><div class="typing-indicator" id="typingIndicator"><div class="message-avatar bot-avatar"><i class="fas fa-robot"></i></div><div class="typing-dots"><span></span><span></span><span></span></div></div>';
+        if (messagesContainer) {
+            messagesContainer.innerHTML = `
+                <div class="welcome-screen" id="welcomeScreen">
+                    <div class="welcome-icon">
+                        <i class="fas fa-robot"></i>
+                    </div>
+                    <h1 class="welcome-title">Bagaimana saya bisa membantu Anda hari ini?</h1>
+                    <p class="welcome-subtitle">Saya adalah Sopeng, asisten AI Anda yang siap membantu apapun yang Anda butuhkan</p>
+                    <div class="suggestions-grid">
+                        <div class="suggestion-card" onclick="sendSuggestion('Bantu saya menulis email profesional untuk klien')">
+                            <div class="suggestion-icon"><i class="fas fa-envelope"></i></div>
+                            <div class="suggestion-title">Tulis Email</div>
+                            <div class="suggestion-desc">Bantuan menulis email profesional</div>
+                        </div>
+                        <div class="suggestion-card" onclick="sendSuggestion('Jelaskan tentang quantum computing dengan bahasa sederhana')">
+                            <div class="suggestion-icon"><i class="fas fa-graduation-cap"></i></div>
+                            <div class="suggestion-title">Belajar Sesuatu</div>
+                            <div class="suggestion-desc">Dapatkan penjelasan yang jelas</div>
+                        </div>
+                        <div class="suggestion-card" onclick="sendSuggestion('Berikan ide kreatif untuk project baru saya')">
+                            <div class="suggestion-icon"><i class="fas fa-lightbulb"></i></div>
+                            <div class="suggestion-title">Brainstorming</div>
+                            <div class="suggestion-desc">Partner berpikir kreatif</div>
+                        </div>
+                        <div class="suggestion-card" onclick="sendSuggestion('Buatkan contoh code Python untuk API dengan FastAPI')">
+                            <div class="suggestion-icon"><i class="fas fa-code"></i></div>
+                            <div class="suggestion-title">Code Review</div>
+                            <div class="suggestion-desc">Bantuan pemrograman</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="typing-indicator" id="typingIndicator">
+                    <div class="message-avatar bot-avatar">
+                        <i class="fas fa-robot"></i>
+                    </div>
+                    <div class="typing-dots">
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                    </div>
+                </div>
+            `;
+        }
         
         showNotification('Chat baru dimulai!', 'success');
     }
@@ -353,9 +476,11 @@ function clearAllChats() {
 // ==========================================
 function scrollToBottom() {
     const chatMessages = document.getElementById('chatMessages');
-    setTimeout(() => {
-        chatMessages.scrollTop = chatMessages.scrollHeight;
-    }, 100);
+    if (chatMessages) {
+        setTimeout(() => {
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }, 100);
+    }
 }
 
 // ==========================================
@@ -373,10 +498,12 @@ function updateStatus(text) {
 // ==========================================
 function shakeInput() {
     const inputBox = document.querySelector('.input-box');
-    inputBox.style.animation = 'shake 0.5s';
-    setTimeout(() => {
-        inputBox.style.animation = '';
-    }, 500);
+    if (inputBox) {
+        inputBox.style.animation = 'shake 0.5s';
+        setTimeout(() => {
+            inputBox.style.animation = '';
+        }, 500);
+    }
 }
 
 // Add shake animation
@@ -407,9 +534,9 @@ function showNotification(message, type, duration) {
         icon = 'fa-exclamation-triangle';
     }
     
-    notification.innerHTML = '<i class="fas ' + icon + '"></i><span>' + message + '</span>';
+    notification.innerHTML = `<i class="fas ${icon}"></i><span>${message}</span>`;
     
-    notification.style.cssText = 'position: fixed; top: 20px; right: 20px; background: ' + bgColor + '; color: white; padding: 15px 20px; border-radius: 12px; font-size: 0.9rem; z-index: 10000; box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3); display: flex; align-items: center; gap: 10px; animation: slideInRight 0.3s ease; max-width: 400px;';
+    notification.style.cssText = `position: fixed; top: 20px; right: 20px; background: ${bgColor}; color: white; padding: 15px 20px; border-radius: 12px; font-size: 0.9rem; z-index: 10000; box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3); display: flex; align-items: center; gap: 10px; animation: slideInRight 0.3s ease; max-width: 400px;`;
     
     document.body.appendChild(notification);
     
@@ -443,18 +570,20 @@ function escapeHtml(text) {
 function setupKeyboardShortcuts() {
     const input = document.getElementById('messageInput');
     
-    input.addEventListener('keydown', function(e) {
-        if (e.key === 'Enter' && !e.shiftKey) {
-            e.preventDefault();
-            sendMessage();
-        }
-    });
+    if (input) {
+        input.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage();
+            }
+        });
+    }
 
     document.addEventListener('keydown', function(e) {
         // Cmd/Ctrl + K to focus input
         if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
             e.preventDefault();
-            input.focus();
+            if (input) input.focus();
         }
         
         // Cmd/Ctrl + Shift + N for new chat
@@ -469,28 +598,47 @@ function setupKeyboardShortcuts() {
             toggleSidebar();
         }
 
-        // Escape to clear input
+        // Escape to clear input or close sidebar
         if (e.key === 'Escape') {
-            input.value = '';
-            input.style.height = 'auto';
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebarOverlay');
+            
+            // Close sidebar if open on mobile
+            if (sidebar && !sidebar.classList.contains('collapsed') && isMobile()) {
+                toggleSidebar();
+            } else {
+                // Clear input
+                if (input) {
+                    input.value = '';
+                    input.style.height = 'auto';
+                }
+            }
         }
     });
 }
 
 // ==========================================
-// RESPONSIVE - AUTO COLLAPSE SIDEBAR ON MOBILE
+// RESPONSIVE - CHECK MOBILE
 // ==========================================
 function isMobile() {
     return window.innerWidth <= 768;
 }
 
-if (isMobile()) {
-    document.getElementById('sidebar').classList.add('collapsed');
-}
-
+// Handle window resize
 window.addEventListener('resize', function() {
-    if (isMobile()) {
-        document.getElementById('sidebar').classList.add('collapsed');
+    const sidebar = document.getElementById('sidebar');
+    const overlay = document.getElementById('sidebarOverlay');
+    
+    if (!isMobile()) {
+        // Desktop: ensure overlay is hidden
+        if (overlay && overlay.classList.contains('active')) {
+            overlay.classList.remove('active');
+        }
+    } else {
+        // Mobile: ensure sidebar is collapsed on first load
+        if (sidebar && !sidebar.classList.contains('collapsed')) {
+            sidebar.classList.add('collapsed');
+        }
     }
 });
 
@@ -504,6 +652,6 @@ console.log('   - Shift + Enter: New line');
 console.log('   - Cmd/Ctrl + K: Focus input');
 console.log('   - Cmd/Ctrl + Shift + N: New chat');
 console.log('   - Cmd/Ctrl + B: Toggle sidebar');
-console.log('   - Escape: Clear input');
+console.log('   - Escape: Clear input / Close sidebar');
 console.log('📊 Model Display:', CONFIG.MODEL_DISPLAY_NAME);
 console.log('🔧 Model Backend:', CONFIG.MODEL);
